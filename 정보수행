@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>쿼리도 vs AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; touch-action: manipulation; }
+        #board-container {
+            display: grid;
+            grid-template-columns: repeat(8, minmax(0, 1fr) 10px) minmax(0, 1fr);
+            grid-template-rows: repeat(8, minmax(0, 1fr) 10px) minmax(0, 1fr);
+            background-color: #1e293b; border: 4px solid #334155; border-radius: 8px;
+            width: 95vw; max-width: 500px; aspect-ratio: 1 / 1; margin: 0 auto;
+        }
+        .board-cell { background-color: #334155; border-radius: 4px; position: relative; display: flex; justify-content: center; align-items: center; }
+        .board-wall-slot { cursor: pointer; }
+        .player { width: 70%; height: 70%; border-radius: 50%; position: absolute; z-index: 10; }
+        .player-0 { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+        .player-1 { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .player-card.active { border-color: #fbbf24; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="w-full max-w-lg mb-4 flex justify-between items-end">
+        <div id="player-1-card" class="player-card border-2 border-transparent rounded-xl p-3 bg-slate-800 flex-1 mr-2 flex flex-col items-center">
+            <div class="text-red-500 font-bold"><i class="fa-solid fa-robot"></i> 인공지능</div>
+        </div>
+        <div id="player-0-card" class="player-card active border-2 border-transparent rounded-xl p-3 bg-slate-800 flex-1 ml-2 flex flex-col items-center">
+            <div class="text-blue-500 font-bold"><i class="fa-solid fa-user-astronaut"></i> 당신</div>
+            <div id="player-rank-display" class="text-xs font-bold text-amber-600">🏆 브론즈 (0 XP)</div>
+        </div>
+    </div>
+
+    <div id="board-container"></div>
+
+    <div class="w-full max-w-lg mt-6 flex justify-between items-center gap-4">
+        <button id="rotate-btn" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-3 px-4 rounded-lg">벽 회전</button>
+        <button id="restart-btn" class="flex-1 bg-rose-600 hover:bg-rose-500 text-white font-semibold py-3 px-4 rounded-lg">다시 시작</button>
+    </div>
+
+    <script>
+        const BOARD_SIZE = 17;
+        let board = [], players = [], currentPlayer = 0, currentPoints = 0;
+        const RANKS = [{name:'브론즈', min:0}, {name:'실버', min:100}, {name:'골드', min:300}, {name:'플래티넘', min:600}, {name:'다이아', min:1000}];
+
+        function initGame() {
+            board = Array(BOARD_SIZE).fill().map(() => Array(BOARD_SIZE).fill(0));
+            players = [
+                {r: 16, c: 8, colorClass: 'player-0'}, 
+                {r: 0, c: 8, colorClass: 'player-1'}
+            ];
+            createBoardDOM();
+            render();
+        }
+
+        function createBoardDOM() {
+            const boardEl = document.getElementById('board-container');
+            boardEl.innerHTML = '';
+            for (let r = 0; r < BOARD_SIZE; r++) {
+                for (let c = 0; c < BOARD_SIZE; c++) {
+                    const div = document.createElement('div');
+                    div.id = `cell-${r}-${c}`;
+                    div.className = (r%2==0 && c%2==0) ? 'board-cell' : 'board-wall-slot';
+                    boardEl.appendChild(div);
+                }
+            }
+        }
+
+        function render() {
+            players.forEach(p => {
+                const cell = document.getElementById(`cell-${p.r}-${p.c}`);
+                if(cell) {
+                    const pawn = document.createElement('div');
+                    pawn.className = `player ${p.colorClass}`;
+                    cell.appendChild(pawn);
+                }
+            });
+        }
+
+        document.getElementById('rotate-btn').addEventListener('click', () => alert('벽 방향이 전환되었습니다.'));
+        document.getElementById('restart-btn').addEventListener('click', initGame);
+        window.onload = initGame;
+    </script>
+</body>
+</html>
